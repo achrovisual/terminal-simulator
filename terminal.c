@@ -4,6 +4,9 @@
 #include <limits.h>
 #include <time.h>
 #include <string.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 int get_input(char *str) {
   char buf[120];
@@ -44,6 +47,9 @@ int parse_input(char *string_input, char *string_command, char *string_echo, int
   else if (strcmp(string_command, "say") == 0) {
     *arg_id = 4;
   }
+  else if (strcmp(string_command, "dir") == 0) {
+    *arg_id = 5;
+  }
   else if (strcmp(string_command, "exit") == 0) {
     *arg_id = 7;
   }
@@ -60,7 +66,6 @@ void command_handler(int arg_id, char *string_input) {
   3 = clear // clear console screen
   4 = say // echo string input
   */
-
   char cwd[PATH_MAX];
 
   if (arg_id == 1) {
@@ -84,6 +89,29 @@ void command_handler(int arg_id, char *string_input) {
   else if (arg_id == 4) {
     printf("%s\n", string_input);
   }
+  else if (arg_id == 5){
+
+    struct dirent *currDir;
+    struct stat acc;
+    
+    DIR *dr = opendir("."); 
+    
+    if (dr == NULL)
+    { 
+        printf("Directory cannot be opened." );
+    } 
+  
+    while ((currDir = readdir(dr)) != NULL){
+      stat(currDir->d_name, &acc);
+      printf("Filename: %s\n", currDir->d_name);
+      printf("File size: %d Bytes\n", acc.st_size);
+      printf("Created on: %s\n\n", ctime(&acc.st_mtime));
+    }
+         
+  
+    closedir(dr);    
+   }	
+
 }
 
 int main() {
