@@ -27,10 +27,9 @@ int parse_input(char *string_input, char *string_command, char *string_echo, int
   strncpy(input_copy, string_input, length);
 
   temp = strtok_r (input_copy, delimiter, &context);
-  string_echo = context;
 
   strcpy(string_command, temp);
-
+  strcpy(string_echo, context);
   free(input_copy);
 
   if (strcmp(string_command, "pwd") == 0) {
