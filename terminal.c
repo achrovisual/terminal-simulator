@@ -4,6 +4,7 @@
 #include <limits.h>
 #include <time.h>
 #include <string.h>
+#include <curses.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -50,6 +51,9 @@ int parse_input(char *string_input, char *string_command, char *string_echo, int
   else if (strcmp(string_command, "dir") == 0) {
     *arg_id = 5;
   }
+  else if (strcmp(string_command, "marquee") == 0) {
+    *arg_id = 6;
+  }
   else if (strcmp(string_command, "exit") == 0) {
     *arg_id = 7;
   }
@@ -89,29 +93,66 @@ void command_handler(int arg_id, char *string_input) {
   else if (arg_id == 4) {
     printf("%s\n", string_input);
   }
-  else if (arg_id == 5){
+  else if (arg_id == 5) {
 
     struct dirent *currDir;
     struct stat acc;
-    
-    DIR *dr = opendir("."); 
-    
+
+    DIR *dr = opendir(".");
+
     if (dr == NULL)
-    { 
-        printf("Directory cannot be opened." );
-    } 
-  
+    {
+      printf("Directory cannot be opened." );
+    }
+
     while ((currDir = readdir(dr)) != NULL){
       stat(currDir->d_name, &acc);
       printf("Filename: %s\n", currDir->d_name);
       printf("File size: %d Bytes\n", acc.st_size);
       printf("Created on: %s\n\n", ctime(&acc.st_mtime));
     }
-         
-  
-    closedir(dr);    
-   }	
 
+
+    closedir(dr);
+  }
+  else if (arg_id == 6) {
+
+    char text[120] = " ";
+    int text_length;
+    int i, max_x, max_y;
+
+    strcat(text, string_input);
+    strcat(text, " ");
+    // Get text length
+    text_length = strlen(text);
+
+    // Initialize screen for ncurses
+    initscr();
+    // Don't show cursor
+    curs_set(0);
+    // Get terminal dimensions
+    getmaxyx(stdscr, max_y, max_x);
+    // Scroll text across the screen once
+    while (1) {
+      for (i = 0; i < (max_x - text_length); i++) {
+        mvaddstr(0,i, text);
+        refresh();
+        usleep(50000);
+      }
+
+      // Scroll text back across the screen
+      for (i = (max_x - text_length); i > 0; i--) {
+        mvaddstr(0,i, text);
+        refresh();
+        usleep(50000);
+      }
+    }
+
+    // Wait for a keypress before quitting
+    getch();
+
+    endwin();
+  }
 }
 
 int main() {
@@ -126,7 +167,7 @@ int main() {
     // take input
     printf("MyOS> ");
     if (get_input(string_input))
-      continue;
+    continue;
     // break;
 
     execution_flag = parse_input(string_input, string_command, string_echo, &arg_id);
