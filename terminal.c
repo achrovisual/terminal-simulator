@@ -8,6 +8,9 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include<pthread.h>
+
+int status = 1;
 
 int get_input(char *str) {
   char buf[120];
@@ -128,34 +131,43 @@ void command_handler(int arg_id, char *string_input) {
 
     // Initialize screen for ncurses
     initscr();
-    // Don't show cursor
-    curs_set(0);
-    // Get terminal dimensions
+
     getmaxyx(stdscr, max_y, max_x);
+    WINDOW* subwindow = newwin(1, max_x, 0, 0);
+    // Don't show cursor
+    // Get terminal dimensions
     // Scroll text across the screen once
+    refresh();
     while (1) {
       for (i = 0; i < (max_x - text_length); i++) {
-        mvaddstr(0,i, text);
-        refresh();
+        wprintw(subwindow, text);
+        wmove(subwindow, 0, i);
+        wrefresh(subwindow);
         usleep(50000);
       }
 
-      // Scroll text back across the screen
       for (i = (max_x - text_length); i > 0; i--) {
-        mvaddstr(0,i, text);
-        refresh();
+        wprintw(subwindow, text);
+        wmove(subwindow, 0, i);
+        wrefresh(subwindow);
         usleep(50000);
       }
+      //
+      // // Scroll text back across the screen
+      // for (i = (max_x - text_length); i > 0; i--) {
+      //   mvaddstr(0,i, text);
+      //   refresh();
+      //   usleep(50000);
+      // }
     }
 
     // Wait for a keypress before quitting
     getch();
-
     endwin();
   }
 }
 
-int main() {
+void *thread() {
   char string_input[120] = "Hello World";
   char string_command[120] = "Hello World";
   char string_echo[120] = "Hello World";
@@ -163,7 +175,9 @@ int main() {
   int execution_flag = 0;
   int arg_id = 0;
 
-  while (1) {
+  pthread_t id = pthread_self();
+
+  while (status) {
     // take input
     printf("MyOS> ");
     if (get_input(string_input))
@@ -174,9 +188,17 @@ int main() {
     command_handler(arg_id, string_echo);
 
     if (arg_id == 7) {
-      return 0;
+      status = 0;
     }
   }
+  return NULL;
+}
 
+int main() {
+  pthread_t tid;
+
+  pthread_create(&tid, NULL, &thread, NULL);
+
+  pthread_exit(NULL);
   return 0;
 }
