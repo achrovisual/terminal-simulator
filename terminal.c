@@ -4,19 +4,19 @@
 #include <limits.h>
 #include <time.h>
 #include <string.h>
-#include <curses.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include<pthread.h>
+#include <curses.h>
 
-int status = 1;
+int max_x, max_y;
+WINDOW* mainwindow;
 
 int get_input(char *str) {
   char buf[120];
 
-  scanf("%[^\n]%*c", buf);
-  // printf("%s", buf);
+  scanw("%[^\n]%*c", buf);
+  // printw("%s", buf);
   if (strlen(buf) != 0) {
     strcpy(str, buf);
     return 0;
@@ -77,7 +77,7 @@ void command_handler(int arg_id, char *string_input) {
 
   if (arg_id == 1) {
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
-      printf("Current working dir: %s\n", cwd);
+      printw("Current working dir: %s\n", cwd);
     } else {
       perror("getcwd() error");
     }
@@ -88,15 +88,15 @@ void command_handler(int arg_id, char *string_input) {
 
     time ( &rawtime );
     timeinfo = localtime ( &rawtime );
-    printf ( "Current local time and date: %s", asctime (timeinfo) );
+    printw ( "Current local time and date: %s", asctime (timeinfo) );
   }
   else if (arg_id == 3) {
     system("clear");
   }
   else if (arg_id == 4) {
-    printf("%s\n", string_input);
+    printw("%s\n", string_input);
   }
-  else if (arg_id == 5) {
+  else if (arg_id == 5){
 
     struct dirent *currDir;
     struct stat acc;
@@ -105,69 +105,57 @@ void command_handler(int arg_id, char *string_input) {
 
     if (dr == NULL)
     {
-      printf("Directory cannot be opened." );
+        printw("Directory cannot be opened." );
     }
 
     while ((currDir = readdir(dr)) != NULL){
       stat(currDir->d_name, &acc);
-      printf("Filename: %s\n", currDir->d_name);
-      printf("File size: %d Bytes\n", acc.st_size);
-      printf("Created on: %s\n\n", ctime(&acc.st_mtime));
+      printw("Filename: %s\n", currDir->d_name);
+      printw("File size: %d Bytes\n", acc.st_size);
+      printw("Created on: %s\n\n", ctime(&acc.st_mtime));
     }
-
-
     closedir(dr);
-  }
-  else if (arg_id == 6) {
+   }
+   else if (arg_id == 6) {
 
-    char text[120] = " ";
-    int text_length;
-    int i, max_x, max_y;
+     char text[120] = " ";
+     int text_length;
+     int i;
 
-    strcat(text, string_input);
-    strcat(text, " ");
-    // Get text length
-    text_length = strlen(text);
+     strcat(text, string_input);
+     strcat(text, " ");
+     // Get text length
+     text_length = strlen(text);
 
-    // Initialize screen for ncurses
-    initscr();
+     // Initialize screen for ncurses
+     WINDOW* subwindow = subwin(mainwindow, 1, max_x, 0, 0);
+     // Don't show cursor
+     // Get terminal dimensions
+     // Scroll text across the screen once
+     refresh();
+     while (1) {
+       for (i = 0; i < (max_x - text_length); i++) {
+         wprintw(subwindow, text);
+         wmove(subwindow, 0, i);
+         wrefresh(subwindow);
+         usleep(50000);
+       }
 
-    getmaxyx(stdscr, max_y, max_x);
-    WINDOW* subwindow = newwin(1, max_x, 0, 0);
-    // Don't show cursor
-    // Get terminal dimensions
-    // Scroll text across the screen once
-    refresh();
-    while (1) {
-      for (i = 0; i < (max_x - text_length); i++) {
-        wprintw(subwindow, text);
-        wmove(subwindow, 0, i);
-        wrefresh(subwindow);
-        usleep(50000);
-      }
+       for (i = (max_x - text_length); i > 0; i--) {
+         wprintw(subwindow, text);
+         wmove(subwindow, 0, i);
+         wrefresh(subwindow);
+         usleep(50000);
+       }
+     }
 
-      for (i = (max_x - text_length); i > 0; i--) {
-        wprintw(subwindow, text);
-        wmove(subwindow, 0, i);
-        wrefresh(subwindow);
-        usleep(50000);
-      }
-      //
-      // // Scroll text back across the screen
-      // for (i = (max_x - text_length); i > 0; i--) {
-      //   mvaddstr(0,i, text);
-      //   refresh();
-      //   usleep(50000);
-      // }
-    }
-
-    // Wait for a keypress before quitting
-    getch();
-    endwin();
-  }
+     // Wait for a keypress before quitting
+     getch();
+     endwin();
+   }
 }
 
-void *thread() {
+int main() {
   char string_input[120] = "Hello World";
   char string_command[120] = "Hello World";
   char string_echo[120] = "Hello World";
@@ -175,30 +163,26 @@ void *thread() {
   int execution_flag = 0;
   int arg_id = 0;
 
-  pthread_t id = pthread_self();
+  initscr();
+  getmaxyx(stdscr, max_y, max_x);
 
-  while (status) {
+  mainwindow = newwin(max_y, max_x, 0, 0);
+
+  while (1) {
     // take input
-    printf("MyOS> ");
+    printw("MyOS> ");
+    refresh();
     if (get_input(string_input))
-    continue;
+      continue;
     // break;
 
     execution_flag = parse_input(string_input, string_command, string_echo, &arg_id);
     command_handler(arg_id, string_echo);
 
     if (arg_id == 7) {
-      status = 0;
+      return 0;
     }
   }
-  return NULL;
-}
 
-int main() {
-  pthread_t tid;
-
-  pthread_create(&tid, NULL, &thread, NULL);
-
-  pthread_exit(NULL);
   return 0;
 }
