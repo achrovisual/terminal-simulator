@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <curses.h>
+#include <pthread.h>
 
 int max_x, max_y;
 WINDOW* mainwindow;
@@ -116,8 +117,9 @@ void command_handler(int arg_id, char *string_input) {
     }
     closedir(dr);
    }
-   else if (arg_id == 6) {
+}
 
+void *marquee(void* string_input){
      char text[120] = " ";
      char c;
      int text_length;
@@ -135,25 +137,29 @@ void command_handler(int arg_id, char *string_input) {
      // Get terminal dimensions
      // Scroll text across the screen once
      wrefresh(subwindow);
+     int check = 0;
      while (1) {
+       sleep(1);
+       if (check == 0){
+           waddch(stdscr, *("\n"));
+        }
        for (i = 0; i < (max_x - text_length); i++) {
          wprintw(subwindow, text);
          wmove(subwindow, 0, i);
          wrefresh(subwindow);
          usleep(50000);
+         
        }
-
        for (i = (max_x - text_length); i > 0; i--) {
          wprintw(subwindow, text);
          wmove(subwindow, 0, i);
          wrefresh(subwindow);
          usleep(50000);
        }
+       check++;
      }
+
      // Wait for a keypress before quitting
-     getch();
-     endwin();
-   }
 }
 
 int main() {
@@ -181,6 +187,18 @@ int main() {
     execution_flag = parse_input(string_input, string_command, string_echo, &arg_id);
     command_handler(arg_id, string_echo);
 
+    if (arg_id == 6){
+      pthread_t thread;
+      pthread_attr_t attrib;
+      int res;
+      res = pthread_attr_init(&attrib);
+      res = pthread_attr_setdetachstate(&attrib, PTHREAD_CREATE_DETACHED);
+      res = pthread_create(&thread, &attrib, marquee, &string_input);
+      pthread_detach(res);
+      //FOR TESTING
+      //wprintw(stdscr, "MyOS> ");
+      
+    }
     if (arg_id == 7) {
       return 0;
     }
