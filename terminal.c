@@ -176,6 +176,13 @@ int main() {
   mainwindow = newwin(max_y, max_x, 0, 0);
 
   while (1) {
+    //terminating threads for clearing
+    if (arg_id == 3){
+      for(int i = 0; i < pid_counter; i++)
+      pthread_cancel(pids[i]);
+      pid_counter = 0;
+      wmove(stdscr, 0, 0);
+    }
     // take input
     printw("MyOS> ");
     wrefresh(stdscr);
@@ -185,13 +192,6 @@ int main() {
 
     execution_flag = parse_input(string_input, string_command, string_echo, &arg_id);
     command_handler(arg_id, string_echo);
-
-    //terminating threads for clearing
-    if (arg_id == 3){
-      for(int i = 0; i < pid_counter; i++)
-      pthread_cancel(pids[i]);
-      pid_counter = 0;
-    }
 
     if (arg_id == 6){
       pthread_t thread;
