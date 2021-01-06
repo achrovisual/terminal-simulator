@@ -89,19 +89,17 @@ void command_handler(int arg_id, char *string_input) {
   else if (arg_id == 2) {
     time_t rawtime;
     struct tm * timeinfo;
-
+     wrefresh(stdscr);
     time ( &rawtime );
     timeinfo = localtime ( &rawtime );
     printw ( "Current local time and date: %s", asctime (timeinfo) );
   }
-  else if (arg_id == 3) {
-    system("clear");
-  }
   else if (arg_id == 4) {
+     wrefresh(stdscr);
     printw("%s\n", string_input);
   }
   else if (arg_id == 5){
-
+     wrefresh(stdscr);
     struct dirent *currDir;
     struct stat acc;
 
@@ -127,7 +125,7 @@ void *marquee(void* string_input){
   char c;
   int text_length;
   int i, curr_x, curr_y;
-
+  wrefresh(stdscr);
   strcat(text, string_input);
   strcat(text, " ");
   // Get text length
@@ -177,14 +175,9 @@ int main() {
 
   while (1) {
     //terminating threads for clearing
-    if (arg_id == 3){
-      for(int i = 0; i < pid_counter; i++)
-      pthread_cancel(pids[i]);
-      pid_counter = 0;
-      wmove(stdscr, 0, 0);
-    }
+    
     // take input
-    printw("MyOS> ");
+    printw( "MyOS> ");
     wrefresh(stdscr);
     if (get_input(string_input))
     continue;
@@ -193,7 +186,18 @@ int main() {
     execution_flag = parse_input(string_input, string_command, string_echo, &arg_id);
     command_handler(arg_id, string_echo);
 
-    if (arg_id == 6){
+    if (arg_id == 3){
+      wclear(stdscr);
+      wclear(mainwindow);
+      wmove(stdscr, 0, 0);
+      wmove(mainwindow, 0, 0);
+      wrefresh(stdscr);
+      wrefresh(mainwindow);
+      for(int i = 0; i < pid_counter; i++)
+        pthread_cancel(pids[i]);
+      pid_counter = 0;
+    }
+    else if (arg_id == 6){
       pthread_t thread;
       pthread_attr_t attrib;
       int res;
@@ -208,12 +212,14 @@ int main() {
       // wprintw(stdscr, "MyOS> ");
     }
     if (arg_id == 7) {
+      for(int i = 0; i < pid_counter; i++)
+        pthread_cancel(pids[i]);
+      endwin();
       return 0;
     }
     if (arg_id == -1){
       printw("Invalid command. Please try again.\n");
     }
   }
-
   return 0;
 }
