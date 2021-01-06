@@ -119,8 +119,9 @@ void command_handler(int arg_id, char *string_input) {
    else if (arg_id == 6) {
 
      char text[120] = " ";
+     char c;
      int text_length;
-     int i;
+     int i, curr_x, curr_y;
 
      strcat(text, string_input);
      strcat(text, " ");
@@ -128,11 +129,12 @@ void command_handler(int arg_id, char *string_input) {
      text_length = strlen(text);
 
      // Initialize screen for ncurses
-     WINDOW* subwindow = subwin(mainwindow, 1, max_x, 0, 0);
+     getyx(stdscr, curr_y, curr_x);
+     WINDOW* subwindow = subwin(mainwindow, 1, max_x, curr_y, 0);
      // Don't show cursor
      // Get terminal dimensions
      // Scroll text across the screen once
-     refresh();
+     wrefresh(subwindow);
      while (1) {
        for (i = 0; i < (max_x - text_length); i++) {
          wprintw(subwindow, text);
@@ -148,7 +150,6 @@ void command_handler(int arg_id, char *string_input) {
          usleep(50000);
        }
      }
-
      // Wait for a keypress before quitting
      getch();
      endwin();
@@ -167,6 +168,7 @@ int main() {
   getmaxyx(stdscr, max_y, max_x);
 
   mainwindow = newwin(max_y, max_x, 0, 0);
+  scrollok(stdscr, 1);
 
   while (1) {
     // take input
