@@ -1,4 +1,4 @@
-# A Multithreaded Terminal Emulator
+# A Multi-threaded Terminal Emulator
 A simple multi-threaded terminal simulator written in C.
 
 ## How to Compile
