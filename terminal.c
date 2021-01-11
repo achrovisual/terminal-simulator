@@ -65,7 +65,7 @@ int parse_input(char *string_input, char *string_command, char *string_echo, int
   *arg_id = 1;
   else if (strcmp(string_command, "time") == 0)
   *arg_id = 2;
-  else if (strcmp(string_command, "clear") == 0)
+  else if (strcmp(string_command, "clear") == 0 || strcmp(string_command, "cls") == 0)
   *arg_id = 3;
   else if (strcmp(string_command, "say") == 0)
   *arg_id = 4;
