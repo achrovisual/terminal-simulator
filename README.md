@@ -1,5 +1,5 @@
 # A Multithreaded Terminal Emulator
-A simple multi-threaded terminal simulator for our course in operating systems.
+A simple multi-threaded terminal simulator written in C.
 
 ## How to Compile
 Since this ncurses and POSIX threads were used, additional arguments should be entered when compiling the code. Please refer to the example below.
