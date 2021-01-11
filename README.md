@@ -21,6 +21,6 @@ _If you are going to compile this on Windows, you may have to install Windows Su
 | marquee <string>  | Displays a scrolling string that will move from left to right. While the string is animating from left to right, you must still be able to enter and execute commands in the terminal.   |
 | exit  | Terminates the program and closes the window.  |
 
-## Screenshot
+## Screenshots
 ![alt text](/preview1.png "Terminal displaying two marquees executing in separate threads.")
 ![alt text](/preview2.png "Terminal showing various command outputs.")
