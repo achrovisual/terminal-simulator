@@ -22,4 +22,5 @@ _If you are going to compile this on Windows, you may have to install Windows Su
 | exit  | Terminates the program and closes the window.  |
 
 ## Screenshot
-![alt text](/preview.png "Terminal displaying two marquees executing in separate threads.")
+![alt text](/preview1.png "Terminal displaying two marquees executing in separate threads.")
+![alt text](/preview2.png "Terminal showing various command outputs.")
