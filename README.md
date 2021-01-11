@@ -8,6 +8,8 @@ cc terminal.c -lpthread -lncurses
 ```
 To run the program, just open the binary executable produced in terminal.
 
+_If you are going to compile this on Windows, you may have to install Windows Subsystem for Linux from the Microsoft Store._
+
 ## Commands
 | Command  | Description |
 | ------------- | ------------- |
